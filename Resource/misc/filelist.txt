@@ -1,0 +1,16 @@
+[
+    {
+        "file": "charset",
+        "format": "string text",
+        "data description": "list of valid utf-8 chracters",
+        "data format": "each chracters are separated by '\n'",
+        "usage": "remove invalid/unreadable characters from documents"
+    },
+    {
+        "file": "IT_occupations.json",
+        "format": "json",
+        "data description": "list of IT occupations following O*NET classification",
+        "data format": "json with following fields; 1[occupation_id], 2[occupation_name]",
+        "usage": "Documents in IT field are to be classified according to this occupation list"
+    }
+]
