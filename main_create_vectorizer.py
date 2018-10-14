@@ -16,8 +16,6 @@ if __name__ == '__main__':
     from src.vectorizer import create_vectorizer
     import warnings
     import json
-    import dill
-    from datetime import date
     warnings.filterwarnings('ignore')
 
     # ========== parsing arguments ==========
@@ -46,9 +44,3 @@ if __name__ == '__main__':
     # create vectorizers
     vectorizers = create_vectorizer(documents)
     print('Completed fitting vectorizers from documents ' + doc_filename)
-
-    # create filename
-    today = date.today()
-    filename = './Resource/Classifier/' + 'TFIDF_' + str(today) + '_' + \
-               str(int(len(documents) / 1000)) + '.vec'
-    dill.dump(vectorizers, open(filename, 'wb'))

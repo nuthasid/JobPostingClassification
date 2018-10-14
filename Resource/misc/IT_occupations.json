@@ -1,0 +1,74 @@
+[
+    {
+        "occupation_id": "15-1134.00",
+        "occupation_name": "Web Developers"
+    },
+    {
+        "occupation_id": "15-1132.00",
+        "occupation_name": "Applications Devs."
+    },
+    {
+        "occupation_id": "15-1133.00",
+        "occupation_name": "System Software Dev"
+    },
+    {
+        "occupation_id": "15-1121.00",
+        "occupation_name": "System Analysts"
+    },
+    {
+        "occupation_id": "15-1142.00",
+        "occupation_name": "Comp - Network Admin"
+    },
+    {
+        "occupation_id": "15-1151.00",
+        "occupation_name": "Comp User Support Specs"
+    },
+    {
+        "occupation_id": "15-1199.09",
+        "occupation_name": "IT Project Managers"
+    },
+    {
+        "occupation_id": "15-1141.00",
+        "occupation_name": "Database Admin"
+    },
+    {
+        "occupation_id": "15-1199.02",
+        "occupation_name": "Comp System Eng./Architech"
+    },
+    {
+        "occupation_id": "15-1199.01",
+        "occupation_name": "Software QA and Tester"
+    },
+    {
+        "occupation_id": "15-1143.00",
+        "occupation_name": "Comp Network Architechs"
+    },
+    {
+        "occupation_id": "15-1199.08",
+        "occupation_name": "Business Intelligence"
+    },
+    {
+        "occupation_id": "15-1122.00",
+        "occupation_name": "IT Security Analysts"
+    },
+    {
+        "occupation_id": "11-3021.00",
+        "occupation_name": "Comp - Information Managers"
+    },
+    {
+        "occupation_id": "41-9031.00",
+        "occupation_name": "Sales Engineer"
+    },
+    {
+        "occupation_id": "13-1151.00",
+        "occupation_name": "Traing Specs"
+    },
+    {
+        "occupation_id": "00-0001.00",
+        "occupation_name": "UNSURE"
+    },
+    {
+        "occupation_id": "00.0002.00",
+        "occupation_name": "not IT"
+    }
+]

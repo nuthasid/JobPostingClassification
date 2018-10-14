@@ -72,7 +72,8 @@ def fit_tfidf_vectorizer(tokenized_docs, doc_field, max_df=None, min_df=None):
 
 def create_vectorizer(documents: dict, tokenize_func=None,
                       title_max_df=0.95, title_min_df=0.005,
-                      desc_max_df=0.95, desc_min_df=0.005):
+                      desc_max_df=0.95, desc_min_df=0.005,
+                      dump=False):
     """
     Create a fitted VectorizerTFIDF object to be used for document feature extraction
     required for text classification by scikit-learn library.
@@ -104,9 +105,14 @@ def create_vectorizer(documents: dict, tokenize_func=None,
 
     from copy import deepcopy
     from datetime import date
+    import dill
 
     documents = deepcopy(documents)
     today = date.today()
+
+    # create filename
+    filename = './Resource/Classifier/' + 'TFIDF_' + str(today) + '_' + \
+               str(int(len(documents) / 1000)) + '.vec'
 
     # if tokenizer function is provided - implying that the documents are not tokenized
     # or that one wants to re-tokenize the documents.
@@ -118,5 +124,8 @@ def create_vectorizer(documents: dict, tokenize_func=None,
     desc_vectorizer = fit_tfidf_vectorizer(documents, 'desc', desc_max_df, desc_min_df)
     # create VectorizerTFIDF object.
     document_vectorizer = VectorizerTFIDF(title_vectorizer, desc_vectorizer, today)
+
+    if dump:  # if user wants to save the fitted vectorizer.
+        dill.dump(document_vectorizer, open(filename, 'wb'))
 
     return document_vectorizer

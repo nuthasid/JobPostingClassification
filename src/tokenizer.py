@@ -14,6 +14,7 @@ def tokenize(document, cleaner, th_tokenizer, n_grams,
     :return: String of tokens separated by '|'.
     """
 
+    import re
     from copy import deepcopy
 
     document = deepcopy(document)  # make a copy of text.
@@ -22,6 +23,8 @@ def tokenize(document, cleaner, th_tokenizer, n_grams,
     stopwords_en = get_word_list(stop_en_filename) if stop_en_filename else set()
     stopwords_th = get_word_list(stop_th_filename) if stop_th_filename else set()
     keywords = get_word_list(keywords_filename) if stop_th_filename else set()
+    # create re.compile for Thai text pattern.
+    re_pattern_th = re.compile(u'[\u0e00-\u0e7f]')
 
     # clean text
     # (1) remove invalid characters/alphabets,
@@ -35,7 +38,8 @@ def tokenize(document, cleaner, th_tokenizer, n_grams,
     # (1) lemmatize English token excluding keywords
     # (2) segment words
     # (3) remove stopwords excluding keywords
-    document = tokenize_cleaned(document, th_tokenizer, stopwords_en, stopwords_th, keywords)
+    document = tokenize_cleaned(document, th_tokenizer, re_pattern_th,
+                                stopwords_en, stopwords_th, keywords)
     document = [token for token in document if token != '']
 
     # merge token into one string whereas each tokens are separated by '|' and
@@ -44,20 +48,22 @@ def tokenize(document, cleaner, th_tokenizer, n_grams,
     sentences = sentences.split('|\\\\|')  # split into list of sentences.
 
     for sentence in sentences:  # iterate over sentences.
-        document.extend(n_grams_compile(sentence, n_grams))  # make n-grams and add to the document.
+        document.extend(n_grams_compile(sentence, n_grams, re_pattern_th))  # make n-grams and add to the document.
 
     document = '|'.join(document)  # merge all tokens into one string separated by '|' for further processing.
 
     return document
 
 
-def tokenize_cleaned(document, th_tokenizer, stopwords_en, stopwords_th, keywords):
+def tokenize_cleaned(document, th_tokenizer, thai_char,
+                     stopwords_en, stopwords_th, keywords):
     """
     Tokenize and lemmatize tokens in document.
 
 
     :param document: Document in string
     :param th_tokenizer: Thai tokenizer function (return list)
+    :param thai_char: re.compile patter containing all Thai alphabets.
     :param stopwords_en: set() of English stop word
     :param stopwords_th: set() of Thai stop word
     :param keywords: set() of keywords.
@@ -65,7 +71,6 @@ def tokenize_cleaned(document, th_tokenizer, stopwords_en, stopwords_th, keyword
     """
     from copy import deepcopy
     from nltk import WordNetLemmatizer
-    import re
 
     def test_all_en_alpha(text):  # test if characters in the string are all English alphabet.
         roman_alpha = [chr(alpha) for alpha in range(65, 90)] + \
@@ -75,7 +80,6 @@ def tokenize_cleaned(document, th_tokenizer, stopwords_en, stopwords_th, keyword
                 return False
         return True
 
-    pattern_thai_char = re.compile(u'[\u0e00-\u0e7f]')  # Thai alphabet pattern
     word_stem_func = WordNetLemmatizer()  # declare English lemmatizer.
 
     document = deepcopy(document)
@@ -92,7 +96,7 @@ def tokenize_cleaned(document, th_tokenizer, stopwords_en, stopwords_th, keyword
     # tokenize Thai phrase.
     tokenized = []
     for token in document:
-        if pattern_thai_char.search(token):  # check if phrase is in Thai
+        if thai_char.search(token):  # check if phrase is in Thai
             tokenized.extend(th_tokenizer(token))  # extend to include a list of Thai tokens
         else:
             tokenized.append(token)  # append non-Thai tokens
@@ -137,37 +141,46 @@ def get_word_list(filename):
     return words_set
 
 
-def n_gram_make(tokens, n):
+def n_gram_make(tokens, n, th_lang):
     """
     Compile specific "n" n-grams from a list of tokens.
 
 
     :param tokens: A list of tokens.
-    :param n: 'n' length of n-gram
-    :return: A list of specific "n" n-grams - separated by '\s'.
+    :param n: 'n' length of n-gram.
+    :param th_lang: Search result if source sentence is in Thai.
+    :return: A list of specific "n" n-grams - separated by
+            '\s' for English phrase and not separated for Thai phrase.
     """
 
     ngram_ret = []
     for word_index, token in enumerate(tokens[:-(n - 1)]):  # iterate from first token to n-1 position.
         ngram_output = [token for token in tokens[word_index:word_index + n]]  # make n-gram
-        ngram_ret.append(' '.join(ngram_output))  # append n-gram to list.
+        # append n-gram to list.
+        if th_lang:  # if phrase is in Thai
+            ngram_ret.append(''.join(ngram_output))
+        else:  # if phrase is in English
+            ngram_ret.append(' '.join(ngram_output))
 
     return ngram_ret
 
 
-def n_grams_compile(sentence, n):
+def n_grams_compile(sentence, n, th_pattern):
     """
     Create a list of n-gram from n=2 to n=N.
 
 
     :param sentence: String containing sentence.
     :param n: maximum n number for n-gram.
+    :param th_pattern: re.compile containing all Thai alphabets.
     :return: A list of n-grams.
     """
 
     from copy import deepcopy
 
     sentence = deepcopy(sentence)
+    # Thai language indicator.
+    th_lang = True if th_pattern.search(sentence) else th_lang = False
     # split running string and remove null token
     tokens = [token for token in sentence.split('|') if len(token) > 0]
 
@@ -176,7 +189,7 @@ def n_grams_compile(sentence, n):
     else:
         n_tokens = []
         for grams in range(2, n + 1):  # iterate for generating n-gram of n=2 to n=N
-            ngrams = n_gram_make(tokens, grams)  # for a given n=n, make n-gram.
+            ngrams = n_gram_make(tokens, grams, th_lang)  # for a given n=n, make n-gram.
             n_tokens.extend(ngrams)  # store resulting n-gram into a list.
         return n_tokens
 
