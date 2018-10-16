@@ -1,5 +1,5 @@
 def tokenize(document, cleaner, th_tokenizer, n_grams,
-             stop_en_filename=None, stop_th_filename=None, keywords_filename=None):
+             stop_en_filename='./Resource/WordList/stopwords_en_.txt', stop_th_filename=None, keywords_filename=None):
     """
     Clean, tokenize, and generate n-gram from a document (string).
 
@@ -180,7 +180,10 @@ def n_grams_compile(sentence, n, th_pattern):
 
     sentence = deepcopy(sentence)
     # Thai language indicator.
-    th_lang = True if th_pattern.search(sentence) else th_lang = False
+    if th_pattern.search(sentence):
+        th_lang = True
+    else:
+        th_lang = False
     # split running string and remove null token
     tokens = [token for token in sentence.split('|') if len(token) > 0]
 
@@ -312,11 +315,11 @@ def cleaner_generator(char_set_filename, keywords_filename=None):
 
         # begin replacing useless tokens.
         text = text.replace(u'\u0e46', ' ')
+        text = pattern_white_space.sub(' ', text)
         text = pattern_email.sub(' ', text)
         text = pattern_url.sub(' ', text)
         text = pattern_phone_number.sub(' ', text)
         text = pattern_thai_name.sub(' ', text)
-        text = pattern_white_space.sub(' ', text)
         text = split_sentence(text, pattern_thai_phrase_space)
         text = pattern_num_bullet.sub(' \\\\ ', text)
         # End===================================
@@ -336,7 +339,8 @@ def cleaner_generator(char_set_filename, keywords_filename=None):
 
 def generate_tokenizer(cleaner=None, thai_tokenizer=None, ngram=3,
                        char_set_filename='./Resource/misc/charset',
-                       stop_en_filename=None, stop_th_filename=None, keywords_filename=None):
+                       stop_en_filename='./Resource/WordList/stopwords_en_.txt',
+                       stop_th_filename=None, keywords_filename=None):
     """
     Generate document tokenizer with specified parameters.
 
@@ -346,7 +350,7 @@ def generate_tokenizer(cleaner=None, thai_tokenizer=None, ngram=3,
     :param ngram: length of n-gram to compile. Default: 3.
     :param char_set_filename: Path to a text file containing a valid character set.
                                 Default: default character set.
-    :param stop_en_filename: Path to txt file containing English stop word. Default: None
+    :param stop_en_filename: Path to txt file containing English stop word. Default is provided.
     :param stop_th_filename: Path to txt file containing Thai stop word. Default: None
     :param keywords_filename: Path to txt file containing keywords. Default: None
     :return: A tokenizer function which takes a <string document> and
@@ -358,7 +362,8 @@ def generate_tokenizer(cleaner=None, thai_tokenizer=None, ngram=3,
     def tltk_tokenize(text):
         """Default tokenizer specific to Thai phrases - based on tltk.segment. Return a list of tokens."""
         import tltk
-        return tltk.segment(text).replace('<u/>', '').replace('<s/>', '').split('|')
+        ret = tltk.segment(text).replace('<u/>', '').replace('<s/>', '').split('|')
+        return ret
 
     # choose default cleaner function if none is provided.
     if not cleaner:
@@ -377,7 +382,7 @@ def generate_tokenizer(cleaner=None, thai_tokenizer=None, ngram=3,
     return wrapped_tokenizer
 
 
-def tokenize_document(doc_dict: dict, title_ngram=5, desc_ngram=3) -> dict:
+def tokenize_document(doc_dict: dict, title_ngram=5, desc_ngram=4) -> dict:
     """
     Tokenize job title and job description data from document.
 
@@ -402,10 +407,10 @@ def tokenize_document(doc_dict: dict, title_ngram=5, desc_ngram=3) -> dict:
 
 def wrapper_tokenize_doc(document):
     """Wrapper for tokenize_documents() with document as only argument."""
-    return tokenize_document(document, **{'title_ngram': 5, 'desc_ngram': 3})
+    return tokenize_document(document, **{'title_ngram': 5, 'desc_ngram': 4})
 
 
-def tokenize_documents(documents, pool_process=16, chunksize=100):
+def tokenize_documents(documents, pool_process=2, chunksize=2):
     """
     Tokenize a list of documents.
 
@@ -431,10 +436,11 @@ def tokenize_documents(documents, pool_process=16, chunksize=100):
 
     documents = []
     progress_bar = tqdm(total=int(len(src_documents)))
-    print('===================Tokenizing documents===================')
+    tokenize_func = wrapper_tokenize_doc
+    print('===================Tokenizing documents===================\n')
     # tokenize documents using multiprocessing.
     with Pool(processes=pool_process) as pool:
-        pool_result = pool.imap(wrapper_tokenize_doc, src_documents, chunksize=chunksize)
+        pool_result = pool.imap(tokenize_func, src_documents, chunksize=chunksize)
         for doc in pool_result:
             documents.append(doc)
             progress_bar.update()

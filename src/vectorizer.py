@@ -119,9 +119,9 @@ def create_vectorizer(documents: dict, tokenize_func=None,
     if tokenize_func:
         documents = tokenize_func(documents)
     # create vectorizer for job title data.
-    title_vectorizer = fit_tfidf_vectorizer(documents, 'title', title_max_df, title_min_df)
+    title_vectorizer = fit_tfidf_vectorizer(documents, 'title_seg', title_max_df, title_min_df)
     # create vectorizer for job description data.
-    desc_vectorizer = fit_tfidf_vectorizer(documents, 'desc', desc_max_df, desc_min_df)
+    desc_vectorizer = fit_tfidf_vectorizer(documents, 'desc_seg', desc_max_df, desc_min_df)
     # create VectorizerTFIDF object.
     document_vectorizer = VectorizerTFIDF(title_vectorizer, desc_vectorizer, today)
 
