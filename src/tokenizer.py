@@ -71,6 +71,10 @@ def tokenize_cleaned(document, th_tokenizer, thai_char,
     """
     from copy import deepcopy
     from nltk import WordNetLemmatizer
+    import nltk
+
+    if './Resource/nltk_data' not in nltk.data.path:
+        nltk.data.path.append('./Resource/nltk_data')
 
     def test_all_en_alpha(text):  # test if characters in the string are all English alphabet.
         roman_alpha = [chr(alpha) for alpha in range(65, 90)] + \
@@ -85,7 +89,7 @@ def tokenize_cleaned(document, th_tokenizer, thai_char,
     document = deepcopy(document)
     document = document.split(' ')  # split to form a list of phrases which are separated by '\s'
     # remove English stop word.
-    document = [token for token in document
+    document = [token.lower() for token in document
                 if token not in stopwords_en]
     # Lemmatize English tokens.
     document = [word_stem_func.lemmatize(token)
@@ -104,7 +108,7 @@ def tokenize_cleaned(document, th_tokenizer, thai_char,
     # remove Thai stop word
     for token_index in reversed(range(len(tokenized))):  # iterate backward
         if tokenized[token_index] in stopwords_th:  # if token is Thai stop word
-            tokenized.pop(token_index)  # remove Thai stop word from doc
+            tokenize_document.pop(token_index)  # remove Thai stop word from doc
 
     return tokenized
 
@@ -260,8 +264,8 @@ def cleaner_generator(char_set_filename, keywords_filename=None):
         from copy import deepcopy
         temp = deepcopy(th_text)
         while pattern.search(temp):
-            temp = temp[:pattern.search(th_text).start() + 1] + \
-                   ' \\\\ ' + temp[pattern.search(th_text).end() - 1:]
+            temp = temp[:pattern.search(temp).start() + 1] + \
+                   ' \\\\ ' + temp[pattern.search(temp).end() - 1:]
         return temp
 
     def keyword_lower(en_text, keywords):
@@ -302,7 +306,7 @@ def cleaner_generator(char_set_filename, keywords_filename=None):
         pattern_num_bullet = re.compile('^[0-9]+[).]*$')  # numbered bullet
         pattern_double_sentence_stop_maker = re.compile(r'(\\\\)(.){,2}(\\\\)')
         pattern_white_space = re.compile(r'(\s|\t|\n)+')
-        pattern_thai_phrase_space = re.compile(u'[\u0e01-\u0e3a\u0e40-\u0e5d](\s)+[\u0e01-\u0e3a\u0e40-\u0e5d]')
+        # pattern_thai_phrase_space = re.compile(u'[\u0e01-\u0e3a\u0e40-\u0e5d](\s)+[\u0e01-\u0e3a\u0e40-\u0e5d]')
         # discarded letters.
         pattern_garbage_lead_char = re.compile(r'^-|^\||^\.|^#{1,2}|^(-\|)|^(\+\|)|^(#\|)^(\.\|)')
         keyword_pat = [re.compile(keyword) for keyword in keywords]
@@ -320,7 +324,7 @@ def cleaner_generator(char_set_filename, keywords_filename=None):
         text = pattern_url.sub(' ', text)
         text = pattern_phone_number.sub(' ', text)
         text = pattern_thai_name.sub(' ', text)
-        text = split_sentence(text, pattern_thai_phrase_space)
+        # text = split_sentence(text, pattern_thai_phrase_space)
         text = pattern_num_bullet.sub(' \\\\ ', text)
         # End===================================
 
@@ -410,7 +414,7 @@ def wrapper_tokenize_doc(document):
     return tokenize_document(document, **{'title_ngram': 5, 'desc_ngram': 4})
 
 
-def tokenize_documents(documents, pool_process=2, chunksize=2):
+def tokenize_documents(documents, pool_process=32, chunksize=100):
     """
     Tokenize a list of documents.
 

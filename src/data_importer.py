@@ -6,14 +6,15 @@ def import_raw_data(filename):
     with open(filename, 'rt', encoding='utf-8') as fin:
         dataset = fin.read()
 
-    dataset = dataset.replace('}\n{', '},{')
-    dataset = '[' + dataset[:-1] + ']'
+    dataset = dataset.replace('}\n{', '},\n{')
+    dataset = '[\n' + dataset[:-1] + '\n]'
     return json.loads(dataset)
 
 
-def restructure_data(json_dataset):
+def restructure_data(json_dataset, date_pat='./Resource/date_pattern.pck'):
 
     import pickle
+    import re
 
     mapping = {'pdate': 'date',
                'company': 'company',
@@ -70,19 +71,26 @@ def restructure_data(json_dataset):
                  'Nov': 11,
                  'Dec': 12}
 
+    pattern_source_tag = re.compile(r'(\u0E07\u0e32\u0e19)(.+)'
+                                    r'(>(\s*)\u0E07\u0e32\u0e19)'
+                                    r'([\u0e00-\u0e7fa-zA-Z]*)')
+
     field_set = sorted(list(set([mapping[key] for key in list(mapping)])))
 
     documents = []
     for doc in json_dataset:
         data = {}
         for key in field_set:
-            data[key] = ''
+            data[key] = []
         for key in mapping:
             if key in list(doc):
-                data[mapping[key]] = str(doc[key]) + ' \\\\'
+                key_str = pattern_source_tag.sub(' ', str(doc[key]))
+                data[mapping[key]].append(key_str)
+        for key in list(data):
+            data[key] = ' \\\\ '.join(data[key])
         documents.append(data)
 
-    date_pat = pickle.load(open('./Resource/date_pattern.pck', 'rb'))
+    date_pat = pickle.load(open(date_pat, 'rb'))
 
     #date_pat = [re.compile(r'(20[0-9]{2})(\s|\-|\/)([0-9]{2})(\s|\-|\/)([0-9]{2})'),
     #            re.compile(r'([0-9]{2})(\s|\-|\/)([0-1]{1}[0-9]{1})(\s|\-|\/)(25[0-9]{2})'),

@@ -23,3 +23,43 @@ def wrapper(func, arg_names, **kwargs):
     if not type(arg_names) in (list, tuple):
         arg_names = (arg_names,)
     return wrapped_function
+
+
+def balance_training_set(dataset: list, target, field):
+    """From a list of dataset which contain more than one class -
+    as indicated by field, return a list of dataset which contain
+    equal number of target classes - target and the rest."""
+    import random
+    pos_class = []
+    neg_class = []
+    for item in dataset:
+        if item[field] == target:
+            pos_class.append(item)
+        else:
+            neg_class.append(item)
+    if len(pos_class) > len(neg_class):
+        ret_dat = neg_class + random.sample(pos_class, len(neg_class))
+        random.shuffle(ret_dat)
+        return ret_dat
+    elif len(pos_class) < len(neg_class):
+        ret_dat = pos_class + random.sample(neg_class, len(pos_class))
+        random.shuffle(ret_dat)
+        return ret_dat
+    else:
+        return dataset
+
+
+def classify_en_th(document):
+    """Classify English documents from Thai documents and vise-versa
+    based on character count."""
+    th_count = 0
+    en_count = 0
+    for char in document:
+        if ord(char) in range(3585, 3678):
+            th_count += 1
+        elif ord(char) in range(65, 122):
+            en_count += 1
+    if en_count >= th_count:
+        return 'en'
+    else:
+        return 'th'

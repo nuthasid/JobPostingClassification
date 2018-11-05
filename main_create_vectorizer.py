@@ -17,20 +17,18 @@ if __name__ == '__main__':
     from src.vectorizer import create_vectorizer
     import warnings
     import json
-    import pickle
     warnings.filterwarnings('ignore')
 
     # ========== parsing arguments ==========
     argvs = sys.argv[1:]
     doc_filename = argvs.pop(0)
     out_filename = argvs.pop(0)
-    kwargs = {'pool': 16, 'ntitle': 5, 'ndesc': 3, 'chunksize': 1}
+    kwargs = {'pool': 16, 'ntitle': 5, 'ndesc': 3, 'chunksize': 100}
 
     for arg in argvs:
-        print(arg)
         for key in list(kwargs):
-            if arg.find(key):
-                kwargs[key] = arg.split('=')[1]
+            if arg.find(key) != -1:
+                kwargs[key] = int(arg.split('=')[1])
     # ========================================
 
     # Read documents from json file.
@@ -45,7 +43,7 @@ if __name__ == '__main__':
     print('Completed tokenizing documents ' + doc_filename)
 
     json.dump(documents,
-              open('./data/' + out_filename + '.json', 'wt', encoding='utf-8'),
+              open(out_filename, 'wt', encoding='utf-8'),
               ensure_ascii=False)
 
     # create vectorizers
