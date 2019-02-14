@@ -73,7 +73,7 @@ def restructure_data(json_dataset, date_pat='./Resource/date_pattern.pck'):
 
     pattern_source_tag = re.compile(r'(\u0E07\u0e32\u0e19)(.+)'
                                     r'(>(\s*)\u0E07\u0e32\u0e19)'
-                                    r'([\u0e00-\u0e7fa-zA-Z]*)')
+                                    r'([\u0e00-\u0e7fa-zA-Z\s]*)')
 
     field_set = sorted(list(set([mapping[key] for key in list(mapping)])))
 

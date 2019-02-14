@@ -6,7 +6,7 @@
     output:             File name for the output.
     pool=<int>:         Number of pool processes.
     ntitle=<int>:       Length of n-gram for title tokenizer - default = 5.
-    ndesc=<int>:        Length of n-gram for description tokenizer - default = 3.
+    ndesc=<int>:        Length of n-gram for description tokenizer - default = 5.
     chunksize=<int>:    Number of jobs assigned to a given queue in each process.
 """
 
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     argvs = sys.argv[1:]
     doc_filename = argvs.pop(0)
     out_filename = argvs.pop(0)
-    kwargs = {'pool': 16, 'ntitle': 5, 'ndesc': 3, 'chunksize': 100}
+    kwargs = {'pool': 32, 'ntitle': 5, 'ndesc': 5, 'chunksize': 100}
 
     for arg in argvs:
         for key in list(kwargs):
@@ -35,6 +35,7 @@ if __name__ == '__main__':
     print('Loading data from ' + doc_filename)
     with open(doc_filename, 'rt', encoding='utf-8') as f_in:
         documents = json.load(f_in)
+    print('Number of documents: ' + str(len(documents)))
 
     # Tokenize documents
     print(kwargs)

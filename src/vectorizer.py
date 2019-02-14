@@ -71,8 +71,8 @@ def fit_tfidf_vectorizer(tokenized_docs, doc_field, max_df=None, min_df=None):
 
 
 def create_vectorizer(documents: dict, tokenize_func=None,
-                      title_max_df=0.95, title_min_df=0.005,
-                      desc_max_df=0.95, desc_min_df=0.005,
+                      title_max_df=0.95, title_min_df=0.01,
+                      desc_max_df=0.95, desc_min_df=0.025,
                       dump=False):
     """
     Create a fitted VectorizerTFIDF object to be used for document feature extraction
@@ -112,7 +112,7 @@ def create_vectorizer(documents: dict, tokenize_func=None,
 
     # create filename
     filename = './Resource/Classifier/' + 'TFIDF_' + str(today) + '_' + \
-               str(int(len(documents) / 1000)) + '.vec'
+               str(int(len(documents) / 1000)) + 'k.vec'
 
     # if tokenizer function is provided - implying that the documents are not tokenized
     # or that one wants to re-tokenize the documents.

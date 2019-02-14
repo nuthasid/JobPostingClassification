@@ -75,6 +75,8 @@ def tokenize_cleaned(document, th_tokenizer, thai_char,
 
     if './Resource/nltk_data' not in nltk.data.path:
         nltk.data.path.append('./Resource/nltk_data')
+    if '../Resource/nltk_data' not in nltk.data.path:
+        nltk.data.path.append('../Resource/nltk_data')
 
     def test_all_en_alpha(text):  # test if characters in the string are all English alphabet.
         roman_alpha = [chr(alpha) for alpha in range(65, 90)] + \
@@ -122,12 +124,16 @@ def load_char_set(filename):
     :return: A dict of characters with ord value.
     """
     charset = {}
-    with open(filename, 'rt') as char_file:
-        for char in char_file.read().split('\n'):
-            if 0 < len(char) < 4:
-                charset[char] = ord(char)
-            elif len(char) == 4:
-                charset[chr(int(char, 16))] = int(char, 16)
+    try:
+        char_file = open(filename, 'rt')
+    except FileNotFoundError:
+        char_file = open('.' + filename, 'rt')
+    for char in char_file.read().split('\n'):
+        if 0 < len(char) < 4:
+            charset[char] = ord(char)
+        elif len(char) == 4:
+            charset[chr(int(char, 16))] = int(char, 16)
+    char_file.close()
     return charset
 
 
@@ -139,9 +145,12 @@ def get_word_list(filename):
     :param filename: Path to a text file containing word list (each words are separated by \n).
     :return: A set of words/tokens.
     """
-
-    with open(filename, 'rt', encoding='utf-8') as fin:
-        words_set = set([item for item in fin.read().split('\n')])
+    try:
+        wl_file = open(filename, 'rt', encoding='utf-8')
+    except FileNotFoundError:
+        wl_file = open('.' + filename, 'rt', encoding='utf-8')
+    words_set = set([item for item in wl_file.read().split('\n')])
+    wl_file.close()
     return words_set
 
 
